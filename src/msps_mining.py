@@ -1,9 +1,20 @@
 #!/usr/bin/python
 
 '''
-Created on Feb 12, 2013
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+                    Version 2, December 2004
 
-@author: Saurabh Dingolia
+ Copyright (C) 2013 Saurabh Dingolia <dinsaurabh123@gmail.com>
+
+ Everyone is permitted to copy and distribute verbatim or modified
+ copies of this license document, and changing it is allowed as long
+ as the name is changed.
+
+            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+  0. You just DO WHAT THE FUCK YOU WANT TO.
+
 '''
 
 import sys
@@ -84,10 +95,12 @@ def begin_msps(sequences, mis_values, sdc):
     mis_count = int(math.ceil(mis_values.get(item)*len(sequences)))
     
 #    print "------------- Current item:",item,"MIS:",mis_count, "Sup:",support_counts.get(item),"-----------------"
+#    print "Seq:", [sequence for sequence in sequences if has_item(sequence, item)]
        
     # Get the sequences containing that item and filter them to remove elements that do not satisfy SDC i.e. |sup(j) - sup(item)| > sdc
     item_sequences = [sdc_filter_on_item(sequence, item, actual_supports.get(item), actual_supports, sdc) for sequence in sequences if has_item(sequence, item)]
-#    print "ItemSeq:", item_sequences
+#    print "ItemSeq:"
+#    print "\n".join([str(sequence) for sequence in item_sequences])
     
     # Run the restricted Prefix-Span to get sequential patterns
     r_prefix_span(item, item_sequences, mis_count)
@@ -182,6 +195,7 @@ def r_prefix_span(base_item, item_sequences, mis_count):
   
   # Get length-1 frequent sequences
   len_1_freq_sequences = [ [[item]] for item in frequent_items ]
+#  print len_1_freq_sequences
   
   # Add the base_item 1-length sequential pattern to the output database
   if has_item(len_1_freq_sequences, base_item):
@@ -193,9 +207,12 @@ def r_prefix_span(base_item, item_sequences, mis_count):
   
 
 def prefix_span(prefix, item_sequences, base_item, mis_count):
+#  print "Prefix:",prefix
+  
   # Compute the projected database for the current prefix
   projected_db = compute_projected_database(prefix, item_sequences, base_item, mis_count)
-#  print "DB:", projected_db
+#  print "DB:"
+#  print "\n".join([str(sequence) for sequence in projected_db])
   
   # Find the prefix_length + 1 sequential patterns 
   if projected_db:    # Check if the projected database has any sequences
@@ -229,12 +246,15 @@ def prefix_span(prefix, item_sequences, base_item, mis_count):
       all_template_1_items += list(set(template_1_items))   
       all_template_2_items += list(set(template_2_items))
     
+#    print "Template 1 items:", all_template_1_items
+#    print "Template 2 items:", all_template_2_items
+    
     # Compute the total occurences of each element for each template i.e number of sequences it satisfied for a template match
     dict_template_1 = dict(Counter(item for item in all_template_1_items))
     dict_template_2 = dict(Counter(item for item in all_template_2_items))
     
-#    print "Template 1 items:", dict_template_1
-#    print "Template 2 items:", dict_template_2 
+#    print "Template 1 item support:", dict_template_1
+#    print "Template 2 item support:", dict_template_2 
     
     freq_sequential_patterns = []  # Initialize empty list to contain obtained sequential patterns
     
@@ -252,8 +272,8 @@ def prefix_span(prefix, item_sequences, base_item, mis_count):
 #    print "Sequential Patterns:", freq_sequential_patterns  
         
     for (seq_pattern, sup_count) in freq_sequential_patterns:   # Iterate through patterns obtained
-      if has_item(seq_pattern, base_item):
-        output_patterns.append((seq_pattern, sup_count))    # Add the pattern to the output list if it contains base item
+      if has_item(seq_pattern, base_item):    # Add the pattern to the output list if it contains base item
+        output_patterns.append((seq_pattern, sup_count))    
       prefix_span(seq_pattern, item_sequences, base_item, mis_count)  # Call prefix_span recursively with the pattern as prefix
       
     
@@ -262,6 +282,7 @@ def compute_projected_database(prefix, item_sequences, base_item, mis_count):
   
   # Populate the projected database with projected sequences
   for sequence in item_sequences:
+    
     cur_pr_itemset = 0
     cur_sq_itemset = 0
     
@@ -278,10 +299,14 @@ def compute_projected_database(prefix, item_sequences, base_item, mis_count):
       if projected_sequence:    # Non-empty sequence, add to projected database
         projected_db.append(projected_sequence)
   
-  projected_db
+#  print "DB1:"
+#  print "\n".join([str(sequence) for sequence in projected_db])
   
   # Remove the infrequent items
   projected_db = remove_infrequent_items(projected_db, mis_count)
+  
+#  print "DB2:"
+#  print "\n".join([str(sequence) for sequence in projected_db])
   
   # Check if any frequent items are left
   validation_db = remove_empty_elements([[[item for item in itemset if not item == '_'] for itemset in sequence] for sequence in projected_db])
@@ -330,6 +355,7 @@ def sdc_filter(projected_database):
 #  filtered_database = [sequence for i,sequence in enumerate(projected_database) if is_sequence_sdc_satisfied(flattened_sequences[i])]  
   return filtered_database
 
+
 def is_sdc_satisfied(itemset):
   if not itemset:
     return False
@@ -364,7 +390,7 @@ def remove_infrequent_items(item_sequences, min_support_count):
   support_counts = dict(Counter(item for flattened_sequence in flattened_sequences for item in flattened_sequence))
   
   # Remove the infrequent items from the sequence database  
-  filtered_item_sequences = [[[item for item in itemset if support_counts.get(item) >= min_support_count]for itemset in sequence] for sequence in item_sequences]
+  filtered_item_sequences = [[[item for item in itemset if support_counts.get(item) >= min_support_count or item == '_']for itemset in sequence] for sequence in item_sequences]
   
   return remove_empty_elements(filtered_item_sequences)    # Return the new sequence database
     
