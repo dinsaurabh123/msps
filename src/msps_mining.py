@@ -36,11 +36,11 @@ def main():
     _exit()
     
   # Define global variables
-  global output_patterns, sdc, output_dir
+  global output_patterns, sdc, out_file
   output_patterns = []    # To hold the output frequent sequential patterns
   
-  output_dir = os.path.abspath(os.path.join(args[1], os.pardir))
-  print output_dir
+  out_file = os.path.abspath(os.path.join(args[3], os.pardir)) + '/result' + re.search(r'[\d-]+.txt', args[3]).group()
+  print out_file
   
   # Read the data file
   in_file = open(args[1], 'rU')
@@ -98,7 +98,7 @@ def begin_msps(sequences, mis_values, sdc):
     # Get the minimum item support count for item i.e count(MIS(item))
     mis_count = int(math.ceil(mis_values.get(item)*len(sequences)))
     
-    print "------------- Current item:",item,"MIS:",mis_count, "Sup:",support_counts.get(item),"-----------------"
+#    print "------------- Current item:",item,"MIS:",mis_count, "Sup:",support_counts.get(item),"-----------------"
 #    print "Seq:", [sequence for sequence in sequences if has_item(sequence, item)]
        
     # Get the sequences containing that item and filter them to remove elements that do not satisfy SDC i.e. |sup(j) - sup(item)| > sdc
@@ -141,7 +141,7 @@ def write_output(output_list):
     output_text += "\n"
   
   print output_text
-  output_file = open(output_dir + "/" + "results.txt", 'w')
+  output_file = open(out_file, 'w')
   output_file.write(output_text)
   output_file.close()
     
@@ -214,7 +214,7 @@ def r_prefix_span(base_item, item_sequences, mis_count):
   
 
 def prefix_span(prefix, item_sequences, base_item, mis_count):
-  print "Prefix:",prefix
+#  print "Prefix:",prefix
   
   # Compute the projected database for the current prefix
   projected_db = compute_projected_database(prefix, item_sequences, base_item, mis_count)
@@ -276,9 +276,9 @@ def prefix_span(prefix, item_sequences, base_item, mis_count):
         # Append the item contained in a new itemset to the prefix
         freq_sequential_patterns.append((prefix + [[item]], sup_count))    # Add the pattern with its support count to frequent patterns list
     
-    print "Sequential Patterns Before SDC:", [pattern for pattern, sup_count in freq_sequential_patterns]  
+#    print "Sequential Patterns Before SDC:", [pattern for pattern, sup_count in freq_sequential_patterns]  
     freq_sequential_patterns = [(pattern, sup_count) for pattern, sup_count in freq_sequential_patterns if is_sequence_sdc_satisfied(list(set(itertools.chain(*pattern))))]
-    print "Sequential Patterns After SDC:", [pattern for pattern, sup_count in freq_sequential_patterns]  
+#    print "Sequential Patterns After SDC:", [pattern for pattern, sup_count in freq_sequential_patterns]  
         
     for (seq_pattern, sup_count) in freq_sequential_patterns:   # Iterate through patterns obtained
       if has_item(seq_pattern, base_item):    # Add the pattern to the output list if it contains base item
@@ -373,42 +373,40 @@ def has_item(source_list, item):
   return False
 
 
-def sdc_filter(projected_database):
-#  filtered_database = [[itemset for itemset in sequence if is_sdc_satisfied(itemset)] for sequence in projected_database]
-#  filtered_database = [sequence for sequence in projected_database if is_sequence_sdc_satisfied(sequence)]
-  flattened_sequences = [ list(set(itertools.chain(*sequence))) for sequence in projected_database ]
-  filtered_database = [sequence for i,sequence in enumerate(projected_database) if is_sequence_sdc_satisfied(flattened_sequences[i])]   
-  return filtered_database
+#def sdc_filter(projected_database):
+##  filtered_database = [[itemset for itemset in sequence if is_sdc_satisfied(itemset)] for sequence in projected_database]
+##  filtered_database = [sequence for sequence in projected_database if is_sequence_sdc_satisfied(sequence)]
+#  flattened_sequences = [ list(set(itertools.chain(*sequence))) for sequence in projected_database ]
+#  filtered_database = [sequence for i,sequence in enumerate(projected_database) if is_sequence_sdc_satisfied(flattened_sequences[i])]   
+#  return filtered_database
 
 
-def is_sdc_satisfied(itemset):
-  if not itemset:
-    return False
-  
-  for item1 in itemset:
-    sup_item1 = actual_supports.get(item1)
-    for item2 in itemset:
-      if not item1 == '_' and not item2 == '_':
-        if abs(sup_item1 - actual_supports.get(item2)) > sdc:
-          return False
-      
-  return True
+#def is_sdc_satisfied(itemset):
+#  if not itemset:
+#    return False
+#  
+#  for item1 in itemset:
+#    sup_item1 = actual_supports.get(item1)
+#    for item2 in itemset:
+#      if not item1 == '_' and not item2 == '_':
+#        if abs(sup_item1 - actual_supports.get(item2)) > sdc:
+#          return False
+#      
+#  return True
 
 
 def is_sequence_sdc_satisfied(sequence):
   if not sequence:
     return False
   
-  print sequence 
   if len(sequence) > 1:
     for item1 in sequence:
       sup_item1 = actual_supports.get(item1)
       for item2 in sequence:
         if not item1 == '_' and not item2 == '_' and not item1 == item2:
           if abs(sup_item1 - actual_supports.get(item2)) > sdc:
-            print "False"
             return False 
-  print "True"        
+  
   return True  
 
 
