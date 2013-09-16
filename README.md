@@ -1,13 +1,21 @@
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-                    Version 2, December 2004
+###Implementation of MS-PS algorithm
+Mining Sequential Patterns Based on PS (Prefix Span)
 
- Copyright (C) 2013 Saurabh Dingolia <dinsaurabh123@gmail.com>
+MS-PS algorithm - Sequential pattern mining using multiple minimum supports with a support difference constraint.
 
- Everyone is permitted to copy and distribute verbatim or modified
- copies of this license document, and changing it is allowed as long
- as the name is changed.
+###Input (Format)
+data/data.txt
 
-            DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
-   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+<{25, 37, 47}{48}> -- This is a transaction / sequence
 
-  0. You just DO WHAT THE FUCK YOU WANT TO.
+{25, 37, 47}       -- represents an itemset and each number represents an individual item
+
+data/para.txt
+
+MIS(1) = 0.003     -- Minimum item support for item 1
+
+SDC = 0.05         -- Support difference constraint value.
+
+###Output (Format)
+
+Pattern : <{2}{5,13}{14}{7}> Count : 1 -- The sequential pattern and its count in the transactions
